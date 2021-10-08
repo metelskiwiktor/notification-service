@@ -1,0 +1,38 @@
+version: "3"
+
+services:
+  selenium-hub:
+    image: selenium/hub:3.141.59-yttrium
+    container_name: selenium-hub
+    ports:
+      - "4444:4444"
+    expose:
+      - 4444
+    environment:
+      - TZ="Europe/Paris"
+  chrome:
+    image: selenium/node-chrome-debug:3.141.59-yttrium
+    container_name: chrome
+    ports:
+      - "5900:5900"
+    volumes:
+      - /dev/shm:/dev/shm
+    depends_on:
+      - selenium-hub
+    environment:
+      - HUB_HOST=selenium-hub
+      - HUB_PORT=4444
+  notification-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "18080:8080"
+    environment:
+      - GMAIL_USERNAME=notificaton-user@gmail.com #user that sends notification mails
+      - GMAIL_PASSWORD=password123 #password for this user
+      - GMAIL_RECIPIENT=notification-recipient@gmail.com #recipient of notification mails
+      - ITEM_URL=https://www.banggood.com/LAOTIE-Ti30-Landbreaker-60V-38_4Ah-21700-Battery-5600W-Dual-Motor-Foldable-Electric-Scooter-85Km-or-h-Top-Speed-140km-Mileage-200kg-Bearing-EU-Plug-p-1760299.html?cur_warehouse=CN&ID=6305915&rmmds=search&p=YF291410412600201704&custlinkid=1324665
+      - TZ="Europe/Paris"
+    depends_on:
+      - chrome
